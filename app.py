@@ -217,7 +217,7 @@ def init_db():
             criado_em TEXT NOT NULL)""")
         # Migrações seguras
         for col, dfn in [("cancelado","INTEGER DEFAULT 0"),("na_lixeira","INTEGER DEFAULT 0"),
-                         ("deletado_em","TEXT"),("dados_extras","TEXT")]:
+                         ("deletado_em","TEXT"),("dados_extras","TEXT"),("numero_inscricao","TEXT")]:
             try: conn.execute(f"ALTER TABLE inscricoes ADD COLUMN {col} {dfn}")
             except: pass
         # Semear templates padrão
@@ -406,16 +406,51 @@ def inscrever():
 
 @app.route("/confirmar/<token>")
 def confirmar(token):
+    import random
     cfg = get_config()
     with get_db() as conn:
         row = conn.execute("SELECT * FROM inscricoes WHERE token=?", (token,)).fetchone()
         if not row:
             return render_template("confirmar.html", status="invalido", c=cfg)
         if row["confirmado"]:
-            return render_template("confirmar.html", status="ja_confirmado", nome=row["nome"], c=cfg)
-        conn.execute("UPDATE inscricoes SET confirmado=1 WHERE token=?", (token,))
+            return render_template("confirmar.html", status="ja_confirmado", nome=row["nome"],
+                                   numero=row["numero_inscricao"], c=cfg)
+        numero = f"#{random.randint(100000, 999999)}"
+        conn.execute("UPDATE inscricoes SET confirmado=1, numero_inscricao=? WHERE token=?",
+                     (numero, token))
         conn.commit()
-    return render_template("confirmar.html", status="ok", nome=row["nome"], c=cfg)
+    try:
+        evento = cfg.get("logo_nome", "Evento")
+        assunto = f"Inscrição confirmada – {evento}"
+        html = f"""
+        <div style="font-family:'Segoe UI',Arial,sans-serif;max-width:560px;margin:0 auto;background:#fff;border-radius:16px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,.1);">
+          <div style="background:{cfg.get('cor_primaria','#0d2d6e')};padding:32px 40px;text-align:center;">
+            <h1 style="margin:0;color:#fff;font-size:1.3rem;font-weight:800;">{evento}</h1>
+          </div>
+          <div style="padding:36px 40px;">
+            <p style="font-size:1rem;color:#1e2637;font-weight:700;margin:0 0 12px;">Olá, {row['nome']}!</p>
+            <p style="font-size:.95rem;color:#6b7280;line-height:1.7;margin:0 0 24px;">
+              Sua inscrição foi <strong style="color:#065f46;">confirmada com sucesso</strong>!
+              Estamos felizes em tê-lo(a) conosco.
+            </p>
+            <div style="background:#f4f6fb;border-radius:12px;padding:20px;text-align:center;margin:24px 0;">
+              <p style="margin:0;font-size:.85rem;color:#6b7280;">Seu número de inscrição</p>
+              <p style="margin:8px 0 0;font-size:2rem;font-weight:900;color:{cfg.get('cor_primaria','#0d2d6e')};letter-spacing:2px;">{numero}</p>
+            </div>
+            <p style="font-size:.85rem;color:#9ca3af;margin:0;">
+              Guarde este número — ele identifica sua inscrição em {evento}.
+            </p>
+          </div>
+          <div style="background:#f4f6fb;padding:18px 40px;text-align:center;border-top:1px solid #e5e7eb;">
+            <p style="font-size:.78rem;color:#9ca3af;margin:0;">
+              Você recebe este e-mail por estar inscrito em {evento}.
+            </p>
+          </div>
+        </div>"""
+        send_email(row["email"], assunto, html)
+    except Exception as e:
+        app.logger.error(f"E-mail confirmação erro: {e}")
+    return render_template("confirmar.html", status="ok", nome=row["nome"], numero=numero, c=cfg)
 
 
 # ─── ADMIN AUTH ───────────────────────────────────────────────────────────────

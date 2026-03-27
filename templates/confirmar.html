@@ -36,12 +36,24 @@
       <div class="icon">✅</div>
       <h1>Inscrição confirmada!</h1>
       <p>Parabéns, <strong>{{ nome }}</strong>! Sua inscrição em <strong>{{ c.logo_nome }}</strong> foi confirmada com sucesso. Bem-vindo(a)!</p>
+      {% if numero %}
+      <div style="background:#f4f6fb;border-radius:12px;padding:1rem 1.5rem;margin-bottom:1.5rem;">
+        <p style="margin:0;font-size:.8rem;color:#9ca3af;">Seu número de inscrição</p>
+        <p style="margin:.4rem 0 0;font-size:1.75rem;font-weight:900;color:{{ c.cor_primaria }};letter-spacing:2px;">{{ numero }}</p>
+      </div>
+      {% endif %}
       <a href="/" class="btn">Voltar ao início</a>
 
     {% elif status == 'ja_confirmado' %}
       <div class="icon">ℹ️</div>
       <h1>Já confirmado</h1>
       <p>Olá, <strong>{{ nome }}</strong>! Sua inscrição já havia sido confirmada anteriormente. Tudo certo!</p>
+      {% if numero %}
+      <div style="background:#f4f6fb;border-radius:12px;padding:1rem 1.5rem;margin-bottom:1.5rem;">
+        <p style="margin:0;font-size:.8rem;color:#9ca3af;">Seu número de inscrição</p>
+        <p style="margin:.4rem 0 0;font-size:1.75rem;font-weight:900;color:{{ c.cor_primaria }};letter-spacing:2px;">{{ numero }}</p>
+      </div>
+      {% endif %}
       <a href="/" class="btn">Voltar ao início</a>
 
     {% else %}
