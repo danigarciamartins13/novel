@@ -3,6 +3,11 @@
 app.db
 *.db
 
+# Exportações de leads (dados pessoais — nunca versionar)
+*.xlsx
+*.csv
+*.xls
+
 # Python
 __pycache__/
 *.pyc
