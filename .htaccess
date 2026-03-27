@@ -1,5 +1,6 @@
 PassengerEnabled on
 PassengerAppRoot /home/SEU_USUARIO/novel
+PassengerPython /home/SEU_USUARIO/virtualenv/novel/3.11/bin/python3
 PassengerBaseURI /
 
 # ─── Bloqueia acesso direto a arquivos sensíveis ───────────────────────────
