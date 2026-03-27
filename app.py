@@ -1,6 +1,7 @@
 import os, io, json, sqlite3, uuid, smtplib, ssl as ssl_lib
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
+import requests as http_requests
 from datetime import datetime, timedelta
 from functools import wraps
 from flask import (Flask, request, jsonify, render_template,
@@ -298,6 +299,21 @@ def inject_globals():
 # ─── EMAIL ────────────────────────────────────────────────────────────────────
 
 def send_email(to_addr, subject, html_body):
+    resend_key = os.getenv("RESEND_API_KEY", "")
+    if resend_key:
+        # Usa API HTTP do Resend (não bloqueada por firewalls de cloud)
+        resp = http_requests.post(
+            "https://api.resend.com/emails",
+            headers={"Authorization": f"Bearer {resend_key}",
+                     "Content-Type": "application/json"},
+            json={"from": MAIL_SENDER, "to": [to_addr],
+                  "subject": subject, "html": html_body},
+            timeout=15)
+        if not resp.ok:
+            raise Exception(f"Resend API error {resp.status_code}: {resp.text}")
+        return
+
+    # Fallback SMTP
     msg = MIMEMultipart("alternative")
     msg["Subject"] = subject
     msg["From"]    = MAIL_SENDER
