@@ -303,10 +303,19 @@ def send_email(to_addr, subject, html_body):
     msg["From"]    = MAIL_SENDER
     msg["To"]      = to_addr
     msg.attach(MIMEText(html_body, "html", "utf-8"))
-    ctx = ssl_lib.create_default_context()
-    with smtplib.SMTP_SSL(MAIL_SERVER, MAIL_PORT, context=ctx, timeout=10) as s:
-        s.login(MAIL_USER, MAIL_PASS)
-        s.sendmail(MAIL_USER, to_addr, msg.as_string())
+    use_ssl = os.getenv("MAIL_USE_SSL", "False").lower() == "true"
+    use_tls = os.getenv("MAIL_USE_TLS", "True").lower() == "true"
+    if use_ssl:
+        ctx = ssl_lib.create_default_context()
+        with smtplib.SMTP_SSL(MAIL_SERVER, MAIL_PORT, context=ctx, timeout=10) as s:
+            s.login(MAIL_USER, MAIL_PASS)
+            s.sendmail(MAIL_USER, to_addr, msg.as_string())
+    else:
+        with smtplib.SMTP(MAIL_SERVER, MAIL_PORT, timeout=10) as s:
+            if use_tls:
+                s.starttls(context=ssl_lib.create_default_context())
+            s.login(MAIL_USER, MAIL_PASS)
+            s.sendmail(MAIL_USER, to_addr, msg.as_string())
 
 
 def render_template_vars(body: str, lead: dict, extra: dict = None) -> str:
