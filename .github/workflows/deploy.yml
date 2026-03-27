@@ -1,0 +1,40 @@
+name: Deploy para HostGator
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Baixar código
+        uses: actions/checkout@v4
+
+      - name: Enviar arquivos via rsync (SSH)
+        uses: burnett01/rsync-deployments@7.0.1
+        with:
+          switches: -avz --delete
+            --exclude='.env'
+            --exclude='app.db'
+            --exclude='*.db'
+            --exclude='__pycache__'
+            --exclude='.git'
+            --exclude='.github'
+          path: ./
+          remote_path: ${{ secrets.REMOTE_PATH }}
+          remote_host: ${{ secrets.SSH_HOST }}
+          remote_user: ${{ secrets.SSH_USER }}
+          remote_key: ${{ secrets.SSH_KEY }}
+
+      - name: Instalar dependências e reiniciar app
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_KEY }}
+          script: |
+            source ~/virtualenv/novel/3.*/bin/activate
+            pip install -r ${{ secrets.REMOTE_PATH }}/requirements.txt -q
+            touch ${{ secrets.REMOTE_PATH }}/tmp/restart.txt

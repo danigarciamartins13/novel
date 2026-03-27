@@ -1,0 +1,127 @@
+{% extends "admin_layout.html" %}
+{% set active = "emails" %}
+{% block title %}{{ "Editar" if t else "Novo" }} Template{% endblock %}
+
+{% block head %}
+<style>
+  .editor-wrap { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+  .editor-left { display: flex; flex-direction: column; gap: 1rem; }
+  .editor-right { position: sticky; top: 4rem; align-self: start; }
+  .preview-box {
+    background: #fff; border-radius: 12px; border: 2px solid var(--borda);
+    overflow: hidden; box-shadow: var(--sombra);
+  }
+  .preview-header {
+    background: var(--cinza); border-bottom: 1px solid var(--borda);
+    padding: .6rem 1rem; font-size: .78rem; font-weight: 700; color: var(--muted);
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .preview-header .dot-row { display:flex; gap:.35rem; }
+  .dot { width:10px; height:10px; border-radius:50%; }
+  .dot.r{background:#ff5f57;} .dot.y{background:#ffbd2e;} .dot.g{background:#28ca41;}
+  #preview-iframe { width:100%; height:520px; border:none; display:block; }
+  .vars-box {
+    background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 10px;
+    padding: .85rem 1rem; font-size: .82rem;
+  }
+  .vars-box strong { color: #1d4ed8; display:block; margin-bottom:.4rem; }
+  .var-tag {
+    display: inline-block; background: #dbeafe; border: 1px solid #93c5fd;
+    border-radius: 5px; padding: .15rem .5rem; font-family: monospace;
+    font-size: .8rem; color: #1e40af; margin: .2rem .2rem 0 0; cursor:pointer;
+  }
+  .var-tag:hover { background:#bfdbfe; }
+  #corpo { font-family: 'Courier New', monospace; font-size: .82rem;
+           min-height: 400px; resize: vertical; }
+  @media(max-width:900px) { .editor-wrap { grid-template-columns:1fr; } }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1 class="page-title">{{ "✏️ Editar template" if t else "✉️ Novo template" }}</h1>
+    <p class="page-sub">O preview ao lado atualiza em tempo real conforme você edita o HTML</p>
+  </div>
+  <a href="{{ url_for('admin_emails') }}" style="font-size:.85rem;color:var(--muted);">← Voltar</a>
+</div>
+
+<form method="POST">
+  <!-- Campos do topo -->
+  <div class="p-section" style="padding:1.5rem;margin-bottom:1.25rem;background:#fff;border-radius:12px;box-shadow:var(--sombra);">
+    <div class="field-grid cols-2">
+      <div class="field">
+        <label>Nome do template</label>
+        <input type="text" name="nome" value="{{ form.nome }}" placeholder="Ex: Boas-vindas, Lembrete evento..." required />
+      </div>
+      <div class="field">
+        <label>Assunto do e-mail</label>
+        <input type="text" name="assunto" value="{{ form.assunto }}" placeholder="Ex: Sua inscrição está confirmada!" required />
+      </div>
+    </div>
+  </div>
+
+  <!-- Editor + Preview -->
+  <div class="editor-wrap">
+    <div class="editor-left">
+      <!-- Variáveis -->
+      <div class="vars-box">
+        <strong>Variáveis disponíveis — clique para inserir no cursor:</strong>
+        <span class="var-tag" onclick="inserirVar('{{nome}}')">{{nome}}</span>
+        <span class="var-tag" onclick="inserirVar('{{email}}')">{{email}}</span>
+        <span class="hint" style="display:block;margin-top:.5rem;color:#6b7280;">
+          Use essas variáveis no HTML. Elas serão substituídas pelo dado real de cada lead ao enviar.
+        </span>
+      </div>
+
+      <!-- Textarea HTML -->
+      <div class="field">
+        <label>Corpo do e-mail (HTML)</label>
+        <textarea id="corpo" name="corpo" required
+                  oninput="atualizarPreview()">{{ form.corpo }}</textarea>
+      </div>
+
+      <div style="display:flex;gap:.75rem;">
+        <button type="submit" class="btn-save">💾 Salvar template</button>
+        <a href="{{ url_for('admin_emails') }}" class="btn-save"
+           style="background:#6b7280;text-decoration:none;">Cancelar</a>
+      </div>
+    </div>
+
+    <!-- Preview -->
+    <div class="editor-right">
+      <div class="preview-box">
+        <div class="preview-header">
+          <div class="dot-row">
+            <div class="dot r"></div><div class="dot y"></div><div class="dot g"></div>
+          </div>
+          <span>Preview do e-mail</span>
+          <span></span>
+        </div>
+        <iframe id="preview-iframe" sandbox="allow-same-origin"></iframe>
+      </div>
+    </div>
+  </div>
+</form>
+
+<script>
+  function atualizarPreview() {
+    const html = document.getElementById('corpo').value;
+    document.getElementById('preview-iframe').srcdoc = html;
+  }
+
+  function inserirVar(v) {
+    const ta = document.getElementById('corpo');
+    const start = ta.selectionStart;
+    const end   = ta.selectionEnd;
+    const texto = ta.value;
+    ta.value = texto.slice(0, start) + v + texto.slice(end);
+    ta.selectionStart = ta.selectionEnd = start + v.length;
+    ta.focus();
+    atualizarPreview();
+  }
+
+  // Preview inicial
+  atualizarPreview();
+</script>
+{% endblock %}

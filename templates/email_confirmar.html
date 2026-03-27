@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head><meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" /></head>
+<body style="margin:0;padding:0;background:#f4f6fb;font-family:'Segoe UI',Arial,sans-serif;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background:#f4f6fb;padding:40px 16px;">
+    <tr><td align="center">
+      <table width="100%" cellpadding="0" cellspacing="0" style="max-width:560px;background:#ffffff;border-radius:16px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,.1);">
+
+        <!-- Header -->
+        <tr>
+          <td style="background:linear-gradient(135deg,{{ cor_primaria }},{{ cor_primaria }}cc);padding:36px 40px;text-align:center;">
+            <div style="display:inline-block;background:{{ cor_destaque }};border-radius:12px;width:52px;height:52px;line-height:52px;text-align:center;font-size:1.2rem;font-weight:900;color:#fff;margin-bottom:16px;">
+              {{ site_sigla }}
+            </div>
+            <h1 style="margin:0;color:#ffffff;font-size:1.3rem;font-weight:800;">{{ site_nome }}</h1>
+            <p style="margin:4px 0 0;color:rgba(255,255,255,.75);font-size:.82rem;">{{ site_subtitulo }}</p>
+          </td>
+        </tr>
+
+        <!-- Body -->
+        <tr>
+          <td style="padding:40px 40px 32px;">
+            <p style="font-size:1rem;color:#1e2637;font-weight:700;margin:0 0 8px;">Olá, {{ nome }}!</p>
+            <p style="font-size:.95rem;color:#6b7280;line-height:1.7;margin:0 0 24px;">
+              Obrigado por se inscrever em <strong style="color:{{ cor_primaria }};">{{ site_nome }}</strong>.<br />
+              Clique no botão abaixo para confirmar sua inscrição:
+            </p>
+            <div style="text-align:center;margin:32px 0;">
+              <a href="{{ link }}"
+                 style="background:{{ cor_destaque }};color:#ffffff;text-decoration:none;padding:14px 36px;border-radius:99px;font-size:1rem;font-weight:700;display:inline-block;">
+                Confirmar minha inscrição
+              </a>
+            </div>
+            <p style="font-size:.82rem;color:#9ca3af;line-height:1.6;margin:24px 0 0;">
+              Se você não solicitou esta inscrição, ignore este e-mail.<br />
+              Se o botão não funcionar, copie e cole o link no navegador:
+            </p>
+            <p style="font-size:.78rem;color:#9ca3af;word-break:break-all;margin:8px 0 0;">{{ link }}</p>
+          </td>
+        </tr>
+
+        <!-- Footer -->
+        <tr>
+          <td style="background:#f4f6fb;padding:20px 40px;text-align:center;border-top:1px solid #e5e7eb;">
+            <p style="font-size:.78rem;color:#9ca3af;margin:0;">{{ site_nome }} · {{ site_subtitulo }}</p>
+          </td>
+        </tr>
+
+      </table>
+    </td></tr>
+  </table>
+</body>
+</html>

@@ -1,0 +1,107 @@
+{% extends "admin_layout.html" %}
+{% set active = "leads" %}
+{% block title %}Leads{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1 class="page-title">Leads</h1>
+    <p class="page-sub">Todos os cadastros recebidos pela landing page</p>
+  </div>
+  <a href="{{ url_for('admin_exportar', filtro=filtro) }}" class="btn-export">
+    ⬇ Exportar Excel
+  </a>
+</div>
+
+<!-- Stats -->
+<div class="stats-row">
+  <div class="stat-card azul">
+    <div class="stat-lbl">Total de inscrições</div>
+    <div class="stat-num">{{ total }}</div>
+  </div>
+  <div class="stat-card verde">
+    <div class="stat-lbl">Confirmados</div>
+    <div class="stat-num v">{{ confirmados }}</div>
+  </div>
+  <div class="stat-card amarelo">
+    <div class="stat-lbl">Pendentes</div>
+    <div class="stat-num a">{{ pendentes }}</div>
+  </div>
+  <div class="stat-card vermelho">
+    <div class="stat-lbl">Cancelados</div>
+    <div class="stat-num r">{{ cancelados }}</div>
+  </div>
+</div>
+
+<!-- Filtros -->
+<div class="filter-bar">
+  <span>Filtrar:</span>
+  <a href="/admin?filtro=todos"       class="filter-btn {% if filtro=='todos' %}ativo{% endif %}">Todos</a>
+  <a href="/admin?filtro=confirmados" class="filter-btn {% if filtro=='confirmados' %}ativo{% endif %}">Confirmados</a>
+  <a href="/admin?filtro=pendentes"   class="filter-btn {% if filtro=='pendentes' %}ativo{% endif %}">Pendentes</a>
+  <a href="/admin?filtro=cancelados"  class="filter-btn {% if filtro=='cancelados' %}ativo{% endif %}">Cancelados</a>
+</div>
+
+<!-- Tabela -->
+<div class="table-wrap">
+  {% if inscricoes %}
+  <table>
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>Nome</th>
+        <th>E-mail</th>
+        <th>Telefone</th>
+        <th>Status</th>
+        <th>Cadastro</th>
+        <th style="text-align:right;">Ações</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for i in inscricoes %}
+      <tr>
+        <td class="td-muted" style="font-size:.78rem;">{{ i.id }}</td>
+        <td class="td-nome">{{ i.nome }}</td>
+        <td class="td-muted">{{ i.email }}</td>
+        <td class="td-muted">{{ i.telefone }}</td>
+        <td>
+          {% if i.cancelado %}
+            <span class="badge can"><span class="badge-dot"></span>Cancelado</span>
+          {% elif i.confirmado %}
+            <span class="badge ok"><span class="badge-dot"></span>Confirmado</span>
+          {% else %}
+            <span class="badge pen"><span class="badge-dot"></span>Pendente</span>
+          {% endif %}
+        </td>
+        <td class="td-small">{{ i.criado_em }}</td>
+        <td>
+          <div class="action-row">
+            <!-- Cancelar / Reativar -->
+            <form method="POST" action="/admin/cancelar/{{ i.id }}">
+              {% if i.cancelado %}
+                <button type="submit" class="btn-action reativar" title="Reativar inscrição">↩ Reativar</button>
+              {% else %}
+                <button type="submit" class="btn-action cancelar"
+                        onclick="return confirm('Cancelar inscrição de {{ i.nome }}?')"
+                        title="Cancelar inscrição">✕ Cancelar</button>
+              {% endif %}
+            </form>
+            <!-- Mover para lixeira -->
+            <form method="POST" action="/admin/mover-lixeira/{{ i.id }}"
+                  onsubmit="return confirm('Mover {{ i.nome }} para a lixeira?')">
+              <button type="submit" class="btn-action lixeira" title="Mover para lixeira">🗑</button>
+            </form>
+          </div>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <div class="empty">
+    <div class="empty-icon">📭</div>
+    <p>Nenhuma inscrição encontrada para este filtro.</p>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

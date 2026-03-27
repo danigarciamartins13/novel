@@ -1,0 +1,422 @@
+{% extends "admin_layout.html" %}
+{% set active = "personalizar" %}
+{% block title %}Personalizar Página{% endblock %}
+
+{% block head %}
+<style>
+/* Macro helper — campo com toggle de visibilidade */
+</style>
+{% endblock %}
+
+{% block content %}
+
+{# ── MACRO: campo com toggle oculto ─────────────────────────────────────── #}
+{% macro field_vis(name, label, value, type="text", hint="", rows=0) %}
+{% set oculto_key = "oculto_" ~ name %}
+{% set is_oculto  = c.get(oculto_key, "0") == "1" %}
+<div class="field {% if is_oculto %}is-oculto{% endif %}" id="wrap-{{ name }}">
+  <div class="field-header">
+    <label>{{ label }}</label>
+    <div class="vis-wrap">
+      <span>{{ "Oculto" if is_oculto else "Visível" }}</span>
+      <label class="vis-toggle" title="Ocultar na landing page"
+             onclick="toggleVis('{{ name }}', this)">
+        <input type="checkbox" name="{{ oculto_key }}" value="1"
+               {% if is_oculto %}checked{% endif %} />
+        <span class="vis-slider"></span>
+      </label>
+    </div>
+  </div>
+  {% if rows > 0 %}
+    <textarea name="{{ name }}" rows="{{ rows }}">{{ value }}</textarea>
+  {% else %}
+    <input type="{{ type }}" name="{{ name }}" value="{{ value }}" />
+  {% endif %}
+  {% if hint %}<span class="hint">{{ hint }}</span>{% endif %}
+</div>
+{% endmacro %}
+
+{# ── FORM PRINCIPAL ──────────────────────────────────────────────────────── #}
+<form method="POST" action="{{ url_for('admin_personalizar') }}" id="formPersonalizar">
+
+<div class="save-bar">
+  <p>Alterações refletem na landing page imediatamente após salvar.</p>
+  <button type="submit" class="btn-save">💾 Salvar alterações</button>
+</div>
+
+<div class="page-header" style="margin-bottom:1.25rem;">
+  <div>
+    <h1 class="page-title">🎨 Personalizar Página</h1>
+    <p class="page-sub">Edite textos, cores e visibilidade de cada elemento</p>
+  </div>
+</div>
+
+<!-- ── 1. IDENTIDADE ─────────────────────────────────────────────────────── -->
+<details class="p-section" open>
+  <summary><span class="s-icon">🏷️</span> Identidade Visual <span class="s-arrow">▶</span></summary>
+  <div class="p-body">
+    <div class="field-grid cols-3">
+      <div class="field">
+        <label>Sigla / Ícone</label>
+        <input type="text" name="logo_sigla" value="{{ c.logo_sigla }}" maxlength="4" />
+      </div>
+      <div class="field">
+        <label>Nome do evento / empresa</label>
+        <input type="text" name="logo_nome" value="{{ c.logo_nome }}" />
+      </div>
+      <div class="field">
+        <label>Subtítulo do logo</label>
+        <input type="text" name="logo_subtitulo" value="{{ c.logo_subtitulo }}" />
+      </div>
+    </div>
+    <hr class="divider" />
+    <div class="field-grid cols-3">
+      <div class="color-field">
+        <label>Cor primária</label>
+        <div class="color-row">
+          <input type="color" name="cor_primaria" value="{{ c.cor_primaria }}"
+                 oninput="this.nextElementSibling.textContent=this.value" />
+          <span class="color-hex">{{ c.cor_primaria }}</span>
+        </div>
+      </div>
+      <div class="color-field">
+        <label>Cor secundária</label>
+        <div class="color-row">
+          <input type="color" name="cor_secundaria" value="{{ c.cor_secundaria }}"
+                 oninput="this.nextElementSibling.textContent=this.value" />
+          <span class="color-hex">{{ c.cor_secundaria }}</span>
+        </div>
+      </div>
+      <div class="color-field">
+        <label>Cor de destaque</label>
+        <div class="color-row">
+          <input type="color" name="cor_destaque" value="{{ c.cor_destaque }}"
+                 oninput="this.nextElementSibling.textContent=this.value" />
+          <span class="color-hex">{{ c.cor_destaque }}</span>
+        </div>
+      </div>
+    </div>
+    <hr class="divider" />
+    <div class="field-grid cols-2">
+      <div class="field"><label>Título da aba (SEO)</label><input type="text" name="meta_titulo" value="{{ c.meta_titulo }}" /></div>
+      <div class="field"><label>Descrição (SEO)</label><input type="text" name="meta_descricao" value="{{ c.meta_descricao }}" /></div>
+    </div>
+  </div>
+</details>
+
+<!-- ── 2. HERO ───────────────────────────────────────────────────────────── -->
+<details class="p-section" open>
+  <summary><span class="s-icon">🦸</span> Seção Hero (topo) <span class="s-arrow">▶</span></summary>
+  <div class="p-body">
+    <div class="field-grid cols-2">
+      {{ field_vis("hero_badge", "Badge (etiqueta acima do título)", c.hero_badge) }}
+      <div class="field">
+        <label>Palavra em destaque no título</label>
+        <input type="text" name="hero_titulo_destaque" value="{{ c.hero_titulo_destaque }}" />
+        <span class="hint">Essa palavra será colorida no título</span>
+      </div>
+    </div>
+    <div class="field" style="margin-top:1rem;">
+      <label>Título principal</label>
+      <input type="text" name="hero_titulo" value="{{ c.hero_titulo }}" />
+    </div>
+    {{ field_vis("hero_descricao", "Descrição", c.hero_descricao, rows=2) }}
+    <hr class="divider" />
+    <p style="font-size:.78rem;font-weight:700;color:var(--muted);margin-bottom:.75rem;">NÚMEROS / STATS</p>
+    <div class="field-grid cols-3">
+      {{ field_vis("stat1_num", "Número 1", c.stat1_num) }}
+      <div class="field"><label>Legenda 1</label><input type="text" name="stat1_label" value="{{ c.stat1_label }}" /></div>
+      <div></div>
+      {{ field_vis("stat2_num", "Número 2", c.stat2_num) }}
+      <div class="field"><label>Legenda 2</label><input type="text" name="stat2_label" value="{{ c.stat2_label }}" /></div>
+      <div></div>
+      {{ field_vis("stat3_num", "Número 3", c.stat3_num) }}
+      <div class="field"><label>Legenda 3</label><input type="text" name="stat3_label" value="{{ c.stat3_label }}" /></div>
+    </div>
+  </div>
+</details>
+
+<!-- ── 3. FORMULÁRIO + CAMPOS EXTRAS ─────────────────────────────────────── -->
+<details class="p-section" id="sec-campos">
+  <summary><span class="s-icon">📝</span> Formulário de Inscrição <span class="s-arrow">▶</span></summary>
+  <div class="p-body">
+    <div class="field-grid cols-3">
+      <div class="field"><label>Título</label><input type="text" name="form_titulo" value="{{ c.form_titulo }}" /></div>
+      <div class="field"><label>Subtítulo</label><input type="text" name="form_subtitulo" value="{{ c.form_subtitulo }}" /></div>
+      <div class="field"><label>Texto do botão</label><input type="text" name="form_botao" value="{{ c.form_botao }}" /></div>
+    </div>
+
+    <hr class="divider" />
+    <p style="font-size:.8rem;font-weight:700;color:var(--muted);margin-bottom:.75rem;">
+      CAMPOS PADRÃO — sempre visíveis: Nome, E-mail, Telefone
+    </p>
+    <p style="font-size:.8rem;font-weight:700;color:var(--muted);margin:.75rem 0 .5rem;">
+      CAMPOS EXTRAS
+    </p>
+
+    {% if campos %}
+    <div class="campos-lista">
+      {% for campo in campos %}
+      <div class="campo-item">
+        <div class="campo-info">
+          <div class="campo-label">{{ campo.label }}</div>
+          <div class="campo-meta">
+            <span class="campo-tipo-badge">{{ campo.tipo }}</span>
+            {% if campo.obrigatorio %}<span class="campo-obrig-badge">Obrigatório</span>{% endif %}
+            {% if campo.placeholder %}&nbsp;· placeholder: "{{ campo.placeholder }}"{% endif %}
+          </div>
+        </div>
+        <button type="button" class="btn-del"
+                onclick='deletarCampo({{ campo.id }}, {{ campo.label|tojson }})'>Remover</button>
+      </div>
+      {% endfor %}
+    </div>
+    {% else %}
+    <p style="font-size:.85rem;color:var(--muted);margin-bottom:.75rem;">
+      Nenhum campo extra cadastrado. Use o formulário abaixo para adicionar.
+    </p>
+    {% endif %}
+
+    <!-- Novo campo — usa JS para submeter fora do form principal -->
+    <div class="novo-campo-form">
+      <p style="font-size:.8rem;font-weight:700;color:var(--azul);margin-bottom:.75rem;">+ Novo campo</p>
+      <div class="form-row">
+        <div class="field">
+          <label>Nome do campo</label>
+          <input type="text" id="nc-label" placeholder="Ex: CPF, Empresa, Cargo..." />
+        </div>
+        <div class="field">
+          <label>Tipo</label>
+          <select id="nc-tipo">
+            <option value="text">Texto</option>
+            <option value="email">E-mail</option>
+            <option value="tel">Telefone</option>
+            <option value="number">Número</option>
+            <option value="date">Data</option>
+            <option value="textarea">Texto longo</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Placeholder (opcional)</label>
+          <input type="text" id="nc-placeholder" placeholder="Ex: Digite seu CPF..." />
+        </div>
+        <div class="field">
+          <div class="field-check">
+            <input type="checkbox" id="nc-obrigatorio" value="1" />
+            <label for="nc-obrigatorio">Obrigatório</label>
+          </div>
+          <button type="button" class="btn-save" style="width:100%;margin-top:.4rem;padding:.55rem;"
+                  onclick="adicionarCampo()">
+            Adicionar
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</details>
+
+<!-- ── 4. SOBRE ───────────────────────────────────────────────────────────── -->
+<details class="p-section">
+  <summary><span class="s-icon">📖</span> Seção Sobre <span class="s-arrow">▶</span></summary>
+  <div class="p-body">
+    <div class="field-grid cols-2">
+      <div class="field"><label>Título</label><input type="text" name="sobre_titulo" value="{{ c.sobre_titulo }}" /></div>
+      <div class="field"><label>Subtítulo</label><input type="text" name="sobre_subtitulo" value="{{ c.sobre_subtitulo }}" /></div>
+    </div>
+    {{ field_vis("sobre_texto1", "Parágrafo 1", c.sobre_texto1, rows=3) }}
+    {{ field_vis("sobre_texto2", "Parágrafo 2", c.sobre_texto2, rows=3) }}
+    {{ field_vis("sobre_texto3", "Parágrafo 3", c.sobre_texto3, rows=3) }}
+    <hr class="divider" />
+    <p style="font-size:.78rem;font-weight:700;color:var(--muted);margin-bottom:.75rem;">LINHA DO TEMPO</p>
+    <div class="tl-grid">
+      {% for n in [1,2,3,4] %}
+      {% set oculto = c.get("oculto_tl"~n, "0") == "1" %}
+      <div class="tl-item {% if oculto %}is-oculto{% endif %}" id="wrap-tl{{ n }}">
+        <div class="bene-header">
+          <div class="tl-num">Item {{ n }}</div>
+          <div class="vis-wrap">
+            <span>{{ "Oculto" if oculto else "Visível" }}</span>
+            <label class="vis-toggle" onclick="toggleVis('tl{{ n }}', this)">
+              <input type="checkbox" name="oculto_tl{{ n }}" value="1"
+                     {% if oculto %}checked{% endif %} />
+              <span class="vis-slider"></span>
+            </label>
+          </div>
+        </div>
+        <div class="tl-row">
+          <div class="field"><label>Ícone</label><input type="text" name="tl{{ n }}_icone" value="{{ c['tl'~n~'_icone'] }}" maxlength="4" /></div>
+          <div class="field"><label>Título</label><input type="text" name="tl{{ n }}_titulo" value="{{ c['tl'~n~'_titulo'] }}" /></div>
+        </div>
+        <div class="field"><label>Texto</label><textarea name="tl{{ n }}_texto" style="min-height:60px;">{{ c['tl'~n~'_texto'] }}</textarea></div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</details>
+
+<!-- ── 5. BENEFÍCIOS ──────────────────────────────────────────────────────── -->
+<details class="p-section">
+  <summary><span class="s-icon">✅</span> Benefícios <span class="s-arrow">▶</span></summary>
+  <div class="p-body">
+    <div class="field-grid cols-2" style="margin-bottom:1.25rem;">
+      <div class="field"><label>Título da seção</label><input type="text" name="bene_titulo" value="{{ c.bene_titulo }}" /></div>
+      <div class="field"><label>Subtítulo</label><input type="text" name="bene_subtitulo" value="{{ c.bene_subtitulo }}" /></div>
+    </div>
+    <hr class="divider" />
+
+    <div id="bene-cards-wrap" class="card-grid">
+      {% for n in range(1, 13) %}
+      {% set oculto = c.get("oculto_bene"~n, "0") == "1" %}
+      <div class="bene-item" id="bene-card-{{ n }}"
+           {% if oculto %}style="display:none"{% endif %}>
+        <!-- hidden input controla o estado real (JS atualiza antes do submit) -->
+        <input type="hidden" name="oculto_bene{{ n }}" id="oculto_bene{{ n }}"
+               value="{{ '1' if oculto else '0' }}" />
+        <div class="bene-header">
+          <div class="bene-num">Card {{ n }}</div>
+          <button type="button" class="btn-ocultar-bene"
+                  onclick="ocultarBene({{ n }})">− Ocultar</button>
+        </div>
+        <div class="bene-row">
+          <div class="field"><label>Ícone</label><input type="text" name="bene{{ n }}_icone" value="{{ c.get('bene'~n~'_icone','') }}" maxlength="4" /></div>
+          <div class="field"><label>Título</label><input type="text" name="bene{{ n }}_titulo" value="{{ c.get('bene'~n~'_titulo','') }}" /></div>
+        </div>
+        <div class="field"><label>Descrição</label><textarea name="bene{{ n }}_texto" style="min-height:56px;">{{ c.get('bene'~n~'_texto','') }}</textarea></div>
+      </div>
+      {% endfor %}
+    </div>
+
+    <button type="button" class="btn-add-bene" onclick="adicionarBene()">
+      + Adicionar card de benefício
+    </button>
+  </div>
+</details>
+
+<!-- ── 6. CTA & RODAPÉ ────────────────────────────────────────────────────── -->
+<details class="p-section">
+  <summary><span class="s-icon">🎯</span> CTA & Rodapé <span class="s-arrow">▶</span></summary>
+  <div class="p-body">
+    <div class="field-grid cols-3">
+      <div class="field"><label>Título do CTA</label><input type="text" name="cta_titulo" value="{{ c.cta_titulo }}" /></div>
+      <div class="field"><label>Subtítulo do CTA</label><input type="text" name="cta_subtitulo" value="{{ c.cta_subtitulo }}" /></div>
+      <div class="field"><label>Texto do botão</label><input type="text" name="cta_botao" value="{{ c.cta_botao }}" /></div>
+    </div>
+    <hr class="divider" />
+    <div class="field"><label>Texto do rodapé</label><input type="text" name="footer_texto" value="{{ c.footer_texto }}" /></div>
+    <div class="field-grid cols-2" style="margin-top:.75rem;">
+      {{ field_vis("footer_endereco", "Endereço (rodapé)", c.footer_endereco,
+                   hint="Ex: Av. Paulista, 1000 — São Paulo, SP") }}
+      {{ field_vis("footer_telefone", "Telefone (rodapé)", c.footer_telefone,
+                   hint="Ex: (11) 3000-0000") }}
+    </div>
+  </div>
+</details>
+
+<!-- ── 7. E-MAIL ──────────────────────────────────────────────────────────── -->
+<details class="p-section">
+  <summary><span class="s-icon">✉️</span> Configurações de E-mail <span class="s-arrow">▶</span></summary>
+  <div class="p-body">
+    <div class="field-grid cols-2">
+      <div class="field">
+        <label>Assunto padrão (fallback)</label>
+        <input type="text" name="email_assunto" value="{{ c.email_assunto }}" />
+        <span class="hint">Usado quando nenhum template está selecionado abaixo</span>
+      </div>
+      <div class="field">
+        <label>Nome do remetente</label>
+        <input type="text" name="email_remetente_nome" value="{{ c.email_remetente_nome }}" />
+      </div>
+    </div>
+    <div class="field" style="margin-top:1rem;">
+      <label>Template de e-mail de confirmação</label>
+      <select name="email_template_confirmacao_id">
+        <option value="">— Usar template padrão embutido —</option>
+        {% for t in email_templates %}
+        <option value="{{ t.id }}"
+          {% if c.get('email_template_confirmacao_id','') == t.id|string %}selected{% endif %}>
+          {{ t.nome }}
+        </option>
+        {% endfor %}
+      </select>
+      <span class="hint">
+        Os templates são criados e editados em
+        <a href="{{ url_for('admin_emails') }}" style="color:var(--azul-c);font-weight:600;">E-mails →</a>
+        Use <code>{{nome}}</code> e <code>{{link}}</code> no corpo do template.
+      </span>
+    </div>
+  </div>
+</details>
+
+<div style="text-align:right;margin-top:1.5rem;">
+  <button type="submit" class="btn-save">💾 Salvar todas as alterações</button>
+</div>
+
+</form>{# fim do form principal #}
+
+<script>
+/* Toggle visibilidade individual */
+function toggleVis(name, labelEl) {
+  const wrap  = document.getElementById('wrap-' + name);
+  const cb    = labelEl.querySelector('input[type=checkbox]');
+  const label = labelEl.closest('.vis-wrap').querySelector('span');
+  const oculto = cb.checked;
+  if (wrap) wrap.classList.toggle('is-oculto', oculto);
+  if (label) label.textContent = oculto ? 'Oculto' : 'Visível';
+}
+
+/* Benefícios dinâmicos */
+function ocultarBene(n) {
+  document.getElementById('bene-card-' + n).style.display = 'none';
+  document.getElementById('oculto_bene' + n).value = '1';
+}
+
+function adicionarBene() {
+  for (let n = 1; n <= 12; n++) {
+    const card   = document.getElementById('bene-card-' + n);
+    const hidden = document.getElementById('oculto_bene' + n);
+    if (card && card.style.display === 'none') {
+      card.style.display = '';
+      hidden.value = '0';
+      card.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      return;
+    }
+  }
+  alert('Máximo de 12 cards atingido.');
+}
+
+/* ── Campos extras — submit fora do form principal ─────────────────────── */
+function deletarCampo(id, nome) {
+  if (!confirm('Remover campo "' + nome + '"?')) return;
+  var f = document.createElement('form');
+  f.method = 'POST';
+  f.action = '/admin/campos/' + id + '/deletar';
+  document.body.appendChild(f);
+  f.submit();
+}
+
+function adicionarCampo() {
+  var label = document.getElementById('nc-label').value.trim();
+  if (!label) { alert('Informe o nome do campo.'); return; }
+  var tipo        = document.getElementById('nc-tipo').value;
+  var placeholder = document.getElementById('nc-placeholder').value.trim();
+  var obrigatorio = document.getElementById('nc-obrigatorio').checked ? '1' : '';
+
+  var f = document.createElement('form');
+  f.method = 'POST';
+  f.action = '/admin/campos/adicionar';
+
+  function addField(name, val) {
+    var i = document.createElement('input');
+    i.type = 'hidden'; i.name = name; i.value = val;
+    f.appendChild(i);
+  }
+  addField('label', label);
+  addField('tipo', tipo);
+  addField('placeholder', placeholder);
+  if (obrigatorio) addField('obrigatorio', '1');
+
+  document.body.appendChild(f);
+  f.submit();
+}
+</script>
+{% endblock %}

@@ -1,0 +1,124 @@
+{% extends "admin_layout.html" %}
+{% set active = "emails" %}
+{% block title %}Enviar E-mail{% endblock %}
+
+{% block head %}
+<style>
+  .grupo-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px,1fr)); gap:1rem; margin:1.25rem 0; }
+  .grupo-card {
+    border: 2px solid var(--borda); border-radius: 12px; padding: 1.25rem;
+    cursor: pointer; transition: all .2s; position: relative;
+    background: #fff;
+  }
+  .grupo-card:hover { border-color: var(--azul-c); box-shadow: var(--sombra); }
+  .grupo-card input[type=radio] { position:absolute; opacity:0; }
+  .grupo-card.selected { border-color: var(--azul-c); background: #eff6ff; }
+  .grupo-icon { font-size: 1.75rem; margin-bottom: .5rem; }
+  .grupo-nome { font-size: .95rem; font-weight: 700; color: var(--azul); }
+  .grupo-count { font-size: 1.4rem; font-weight: 900; color: var(--azul-c); }
+  .grupo-label { font-size: .75rem; color: var(--muted); }
+  .grupo-zero { opacity: .45; pointer-events: none; }
+  .preview-email {
+    background:#fff; border-radius:12px; border:2px solid var(--borda);
+    overflow:hidden; box-shadow:var(--sombra); margin-top:1.25rem;
+  }
+  .preview-bar {
+    background:var(--cinza); border-bottom:1px solid var(--borda);
+    padding:.6rem 1rem; font-size:.78rem;font-weight:700;color:var(--muted);
+  }
+  #preview-iframe { width:100%; height:420px; border:none; }
+  .warn-box {
+    background:#fef3c7; border:1px solid #fcd34d; border-radius:10px;
+    padding:.85rem 1rem; font-size:.85rem; color:#92400e;
+    margin-top:1rem;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1 class="page-title">🚀 Enviar campanha</h1>
+    <p class="page-sub">Template: <strong>{{ t.nome }}</strong> — Assunto: {{ t.assunto }}</p>
+  </div>
+  <a href="{{ url_for('admin_emails') }}" style="font-size:.85rem;color:var(--muted);">← Voltar</a>
+</div>
+
+<form method="POST" id="formEnviar">
+  <div class="p-section" style="padding:1.5rem;background:#fff;border-radius:12px;box-shadow:var(--sombra);margin-bottom:1.25rem;">
+
+    <h3 style="font-size:1rem;font-weight:800;color:var(--azul);margin-bottom:.25rem;">
+      1. Selecione o grupo de destinatários
+    </h3>
+    <p style="font-size:.83rem;color:var(--muted);margin-bottom:.25rem;">
+      Clique em um grupo para selecioná-lo. Leads na lixeira nunca são incluídos.
+    </p>
+
+    <div class="grupo-grid">
+      {% for key, (label, _) in grupos.items() %}
+      {% set count = contagens[key][1] %}
+      <label class="grupo-card {% if count == 0 %}grupo-zero{% endif %}" id="card-{{ key }}">
+        <input type="radio" name="grupo" value="{{ key }}"
+               {% if loop.first and count > 0 %}checked{% endif %}
+               onchange="selecionarCard('{{ key }}')" />
+        <div class="grupo-icon">
+          {% if key == 'confirmados' %}✅
+          {% elif key == 'pendentes' %}⏳
+          {% elif key == 'ativos' %}👥
+          {% else %}❌{% endif %}
+        </div>
+        <div class="grupo-nome">{{ label }}</div>
+        <div class="grupo-count">{{ count }}</div>
+        <div class="grupo-label">lead{{ 's' if count != 1 }}</div>
+      </label>
+      {% endfor %}
+    </div>
+
+    {% if contagens.values() | map(attribute=1) | sum == 0 %}
+    <div class="warn-box">⚠️ Não há leads disponíveis para envio. Aguarde novas inscrições.</div>
+    {% endif %}
+  </div>
+
+  <!-- Preview -->
+  <div class="p-section" style="padding:1.5rem;background:#fff;border-radius:12px;box-shadow:var(--sombra);margin-bottom:1.25rem;">
+    <h3 style="font-size:1rem;font-weight:800;color:var(--azul);margin-bottom:.25rem;">
+      2. Preview do e-mail
+    </h3>
+    <p style="font-size:.83rem;color:var(--muted);">
+      Veja como o e-mail será exibido. A variável <code>{{nome}}</code> será substituída pelo nome de cada lead.
+    </p>
+    <div class="preview-email">
+      <div class="preview-bar">Preview — os dados reais serão inseridos no envio</div>
+      <iframe id="preview-iframe" srcdoc="{{ t.corpo | e }}" sandbox="allow-same-origin"></iframe>
+    </div>
+  </div>
+
+  <!-- Confirmar envio -->
+  <div class="p-section" style="padding:1.5rem;background:#fff;border-radius:12px;box-shadow:var(--sombra);">
+    <h3 style="font-size:1rem;font-weight:800;color:var(--azul);margin-bottom:.5rem;">
+      3. Confirmar e enviar
+    </h3>
+    <div class="warn-box" style="background:#fef9c3;border-color:#fde047;color:#713f12;">
+      ⚡ O envio é imediato e irreversível. Verifique o grupo selecionado antes de confirmar.
+    </div>
+    <div style="margin-top:1.25rem;display:flex;gap:.75rem;align-items:center;">
+      <button type="submit" class="btn-save"
+              onclick="return confirm('Confirma o envio para o grupo selecionado?')">
+        🚀 Enviar campanha agora
+      </button>
+      <a href="{{ url_for('admin_emails') }}" style="font-size:.85rem;color:var(--muted);">Cancelar</a>
+    </div>
+  </div>
+</form>
+
+<script>
+  function selecionarCard(key) {
+    document.querySelectorAll('.grupo-card').forEach(c => c.classList.remove('selected'));
+    const card = document.getElementById('card-' + key);
+    if (card) card.classList.add('selected');
+  }
+  // Marcar o primeiro selecionado
+  const checked = document.querySelector('input[name=grupo]:checked');
+  if (checked) selecionarCard(checked.value);
+</script>
+{% endblock %}

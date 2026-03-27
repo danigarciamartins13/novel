@@ -1,0 +1,23 @@
+# Segredos e banco de dados
+.env
+app.db
+*.db
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.egg-info/
+dist/
+build/
+venv/
+.venv/
+
+# IDE / ferramentas locais
+.claude/
+
+# Sistema
+.DS_Store
+Thumbs.db

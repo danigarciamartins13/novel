@@ -1,0 +1,72 @@
+{% extends "admin_layout.html" %}
+{% set active = "lixeira" %}
+{% block title %}Lixeira{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1 class="page-title">🗑️ Lixeira</h1>
+    <p class="page-sub">Leads removidos — restaure ou exclua permanentemente</p>
+  </div>
+  {% if inscricoes %}
+  <form method="POST" action="/admin/esvaziar-lixeira"
+        onsubmit="return confirm('Excluir todos os leads da lixeira permanentemente? Esta ação não pode ser desfeita.')">
+    <button type="submit" class="btn-danger">🗑 Esvaziar lixeira</button>
+  </form>
+  {% endif %}
+</div>
+
+<div class="table-wrap">
+  {% if inscricoes %}
+  <table>
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>Nome</th>
+        <th>E-mail</th>
+        <th>Telefone</th>
+        <th>Era</th>
+        <th>Removido em</th>
+        <th style="text-align:right;">Ações</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for i in inscricoes %}
+      <tr style="opacity:.8;">
+        <td class="td-muted" style="font-size:.78rem;">{{ i.id }}</td>
+        <td class="td-nome" style="text-decoration:line-through;color:#9ca3af;">{{ i.nome }}</td>
+        <td class="td-muted">{{ i.email }}</td>
+        <td class="td-muted">{{ i.telefone }}</td>
+        <td>
+          {% if i.cancelado %}
+            <span class="badge can"><span class="badge-dot"></span>Cancelado</span>
+          {% elif i.confirmado %}
+            <span class="badge ok"><span class="badge-dot"></span>Confirmado</span>
+          {% else %}
+            <span class="badge pen"><span class="badge-dot"></span>Pendente</span>
+          {% endif %}
+        </td>
+        <td class="td-small">{{ i.deletado_em or '—' }}</td>
+        <td>
+          <div class="action-row">
+            <form method="POST" action="/admin/restaurar/{{ i.id }}">
+              <button type="submit" class="btn-action reativar">↩ Restaurar</button>
+            </form>
+            <form method="POST" action="/admin/deletar-permanente/{{ i.id }}"
+                  onsubmit="return confirm('Excluir {{ i.nome }} permanentemente?')">
+              <button type="submit" class="btn-action lixeira">🗑 Excluir</button>
+            </form>
+          </div>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <div class="empty">
+    <div class="empty-icon">✅</div>
+    <p>A lixeira está vazia.</p>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

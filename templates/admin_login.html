@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin – Sindiesp SP</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Inter', sans-serif;
+      background: linear-gradient(135deg, #0d2d6e, #1a4fad);
+      min-height: 100vh;
+      display: flex; align-items: center; justify-content: center;
+      padding: 2rem;
+    }
+    .card {
+      background: #fff;
+      border-radius: 20px;
+      padding: 2.5rem 2rem;
+      max-width: 380px;
+      width: 100%;
+      box-shadow: 0 20px 60px rgba(0,0,0,.25);
+    }
+    .logo { display: flex; align-items: center; gap: .75rem; margin-bottom: 2rem; justify-content: center; }
+    .logo-icon {
+      width: 44px; height: 44px;
+      background: #00a86b; border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1rem; font-weight: 900; color: #fff;
+    }
+    .logo-title { font-size: 1rem; font-weight: 800; color: #0d2d6e; }
+    .logo-sub { font-size: .72rem; color: #6b7280; }
+    h2 { font-size: 1.25rem; font-weight: 800; color: #0d2d6e; margin-bottom: .4rem; text-align: center; }
+    .sub { text-align: center; color: #6b7280; font-size: .85rem; margin-bottom: 1.75rem; }
+    label { display: block; font-size: .82rem; font-weight: 600; color: #0d2d6e; margin-bottom: .4rem; }
+    input[type=email], input[type=password] {
+      width: 100%; padding: .75rem 1rem;
+      border: 2px solid #e5e7eb; border-radius: 10px;
+      font-size: .95rem; outline: none;
+      transition: border-color .2s;
+      background: #f4f6fb;
+    }
+    input[type=email]:focus, input[type=password]:focus { border-color: #1a4fad; background: #fff; }
+    .btn {
+      width: 100%;
+      margin-top: 1.25rem;
+      background: linear-gradient(135deg, #0d2d6e, #1a4fad);
+      color: #fff; border: none; border-radius: 10px;
+      padding: .9rem; font-size: 1rem; font-weight: 700; cursor: pointer;
+    }
+    .btn:hover { opacity: .9; }
+    .erro { color: #dc2626; font-size: .85rem; margin-top: .75rem; text-align: center; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="logo">
+      <div class="logo-icon">SI</div>
+      <div>
+        <div class="logo-title">Sindiesp SP</div>
+        <div class="logo-sub">Painel Administrativo</div>
+      </div>
+    </div>
+    <h2>Acesso restrito</h2>
+    <p class="sub">Insira a senha para acessar o painel.</p>
+    <form method="POST">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+      <label for="email">E-mail</label>
+      <input type="email" id="email" name="email" placeholder="seu@email.com.br" autofocus required style="margin-bottom:1rem;" />
+      <label for="senha">Senha</label>
+      <input type="password" id="senha" name="senha" placeholder="••••••••" required />
+      <button type="submit" class="btn">Entrar</button>
+      {% if erro %}<p class="erro">{{ erro }}</p>{% endif %}
+    </form>
+  </div>
+</body>
+</html>

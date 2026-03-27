@@ -1,0 +1,99 @@
+{% extends "admin_layout.html" %}
+{% set active = "emails" %}
+{% block title %}E-mails{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1 class="page-title">✉️ E-mails</h1>
+    <p class="page-sub">Crie e envie e-mails personalizados para seus leads</p>
+  </div>
+  <a href="{{ url_for('admin_email_novo') }}" class="btn-save">+ Novo template</a>
+</div>
+
+<!-- Templates -->
+<h2 class="section-label">Templates</h2>
+{% if templates %}
+<div class="table-wrap" style="margin-bottom:2rem;">
+  <table>
+    <thead>
+      <tr>
+        <th>Nome do template</th>
+        <th>Assunto</th>
+        <th>Última atualização</th>
+        <th style="text-align:right;">Ações</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for t in templates %}
+      <tr>
+        <td class="td-nome">{{ t.nome }}</td>
+        <td class="td-muted">{{ t.assunto }}</td>
+        <td class="td-small">{{ t.atualizado_em }}</td>
+        <td>
+          <div class="action-row" style="justify-content:flex-end;">
+            <a href="{{ url_for('admin_email_enviar', id=t.id) }}" class="btn-action reativar">
+              🚀 Enviar
+            </a>
+            <a href="{{ url_for('admin_email_editar', id=t.id) }}" class="btn-action cancelar" style="border-color:#bfdbfe;color:#1d4ed8;">
+              ✏️ Editar
+            </a>
+            <form method="POST" action="{{ url_for('admin_email_deletar', id=t.id) }}"
+                  onsubmit="return confirm('Excluir o template &quot;{{ t.nome }}&quot;?')">
+              <button type="submit" class="btn-action lixeira">🗑</button>
+            </form>
+          </div>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% else %}
+<div class="table-wrap" style="margin-bottom:2rem;">
+  <div class="empty">
+    <div class="empty-icon">📝</div>
+    <p>Nenhum template criado ainda.<br />
+       <a href="{{ url_for('admin_email_novo') }}" style="color:#1a4fad;font-weight:600;">Criar primeiro template →</a>
+    </p>
+  </div>
+</div>
+{% endif %}
+
+<!-- Histórico de campanhas -->
+<h2 class="section-label">Histórico de envios</h2>
+{% if campanhas %}
+<div class="table-wrap">
+  <table>
+    <thead>
+      <tr>
+        <th>Template</th>
+        <th>Assunto</th>
+        <th>Grupo</th>
+        <th>Enviados</th>
+        <th>Data</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for camp in campanhas %}
+      <tr>
+        <td class="td-nome">{{ camp.template_nome }}</td>
+        <td class="td-muted">{{ camp.assunto }}</td>
+        <td><span class="badge pen"><span class="badge-dot"></span>{{ camp.grupo }}</span></td>
+        <td style="font-weight:700;color:#0d2d6e;">{{ camp.total_enviados }}</td>
+        <td class="td-small">{{ camp.enviado_em }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% else %}
+<div class="table-wrap">
+  <div class="empty">
+    <div class="empty-icon">📊</div>
+    <p>Nenhuma campanha enviada ainda.</p>
+  </div>
+</div>
+{% endif %}
+
+{% endblock %}

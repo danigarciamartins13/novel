@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{{ c.meta_titulo }}</title>
+  <meta name="description" content="{{ c.meta_descricao }}" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
+  <style>
+    :root {
+      --azul:       {{ c.cor_primaria }};
+      --azul-claro: {{ c.cor_secundaria }};
+      --verde:      {{ c.cor_destaque }};
+      --verde-claro:{{ c.cor_destaque }};
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── HERO ─────────────────────────────────────────────────────────────── -->
+<section class="hero" id="inicio">
+  <nav class="nav">
+    <div class="logo">
+      <div class="logo-icon">{{ c.logo_sigla }}</div>
+      <div class="logo-text">
+        <span class="logo-title">{{ c.logo_nome }}</span>
+        <span class="logo-sub">{{ c.logo_subtitulo }}</span>
+      </div>
+    </div>
+    <a href="#inscricao" class="nav-cta">{{ c.form_botao }}</a>
+  </nav>
+
+  <div class="hero-body">
+    <div class="hero-text">
+      {% if c.get('oculto_hero_badge','0') != '1' %}
+        <span class="hero-badge">{{ c.hero_badge }}</span>
+      {% endif %}
+      <h1 class="hero-title">{{ c.hero_titulo_html | safe }}</h1>
+      {% if c.get('oculto_hero_descricao','0') != '1' %}
+        <p class="hero-desc">{{ c.hero_descricao }}</p>
+      {% endif %}
+      <div class="hero-stats">
+        {% if c.get('oculto_stat1_num','0') != '1' %}
+        <div class="stat">
+          <span class="stat-num">{{ c.stat1_num }}</span>
+          <span class="stat-label">{{ c.stat1_label }}</span>
+        </div>
+        {% endif %}
+        {% if c.get('oculto_stat2_num','0') != '1' %}
+        <div class="stat">
+          <span class="stat-num">{{ c.stat2_num }}</span>
+          <span class="stat-label">{{ c.stat2_label }}</span>
+        </div>
+        {% endif %}
+        {% if c.get('oculto_stat3_num','0') != '1' %}
+        <div class="stat">
+          <span class="stat-num">{{ c.stat3_num }}</span>
+          <span class="stat-label">{{ c.stat3_label }}</span>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Formulário -->
+    <div class="form-card" id="inscricao">
+      <h2>{{ c.form_titulo }}</h2>
+      <p>{{ c.form_subtitulo }}</p>
+      <form id="formInscricao" autocomplete="off">
+        <div class="form-group">
+          <label for="nome">Nome completo</label>
+          <input type="text" id="nome" name="nome" placeholder="Seu nome" required />
+        </div>
+        <div class="form-group">
+          <label for="email">E-mail</label>
+          <input type="email" id="email" name="email" placeholder="seuemail@exemplo.com" required />
+        </div>
+        <div class="form-group">
+          <label for="telefone">Telefone / WhatsApp</label>
+          <input type="tel" id="telefone" name="telefone" placeholder="(11) 99999-9999" required />
+        </div>
+
+        {# Campos extras dinâmicos #}
+        {% for campo in campos %}
+        <div class="form-group">
+          <label for="campo_{{ campo.id }}">
+            {{ campo.label }}{% if campo.obrigatorio %} <span style="color:#dc2626;">*</span>{% endif %}
+          </label>
+          {% if campo.tipo == 'textarea' %}
+            <textarea id="campo_{{ campo.id }}" data-campo-id="{{ campo.id }}"
+                      placeholder="{{ campo.placeholder }}"
+                      {% if campo.obrigatorio %}required{% endif %}
+                      class="campo-extra"
+                      style="width:100%;padding:.75rem 1rem;border:2px solid #e5e7eb;border-radius:10px;font-size:.95rem;resize:vertical;min-height:80px;background:#f4f6fb;outline:none;font-family:inherit;"></textarea>
+          {% else %}
+            <input type="{{ campo.tipo }}" id="campo_{{ campo.id }}"
+                   data-campo-id="{{ campo.id }}"
+                   placeholder="{{ campo.placeholder }}"
+                   {% if campo.obrigatorio %}required{% endif %}
+                   {% if campo.tipo == 'tel' %}class="campo-extra campo-tel"{% else %}class="campo-extra"{% endif %} />
+          {% endif %}
+        </div>
+        {% endfor %}
+
+        <button type="submit" class="btn-submit" id="btnSubmit">{{ c.form_botao }}</button>
+        <div class="form-msg" id="formMsg"></div>
+      </form>
+    </div>
+  </div>
+</section>
+
+<!-- ── SOBRE ─────────────────────────────────────────────────────────────── -->
+{% if c.get('oculto_secao_sobre','0') != '1' %}
+<section class="historia" id="sobre">
+  <div class="container">
+    <h2 class="section-title">{{ c.sobre_titulo }}</h2>
+    <p class="section-sub">{{ c.sobre_subtitulo }}</p>
+    <div class="historia-grid">
+      <div class="historia-text">
+        {% if c.get('oculto_sobre_texto1','0') != '1' and c.sobre_texto1 %}<p>{{ c.sobre_texto1 }}</p>{% endif %}
+        {% if c.get('oculto_sobre_texto2','0') != '1' and c.sobre_texto2 %}<p>{{ c.sobre_texto2 }}</p>{% endif %}
+        {% if c.get('oculto_sobre_texto3','0') != '1' and c.sobre_texto3 %}<p>{{ c.sobre_texto3 }}</p>{% endif %}
+      </div>
+      <div class="historia-timeline">
+        {% for n in [1,2,3,4] %}
+        {% set titulo = c.get('tl'~n~'_titulo','') %}
+        {% if titulo and c.get('oculto_tl'~n,'0') != '1' %}
+        <div class="tl-item">
+          <div class="tl-dot">{{ c.get('tl'~n~'_icone','⚡') }}</div>
+          <div class="tl-content">
+            <h4>{{ titulo }}</h4>
+            <p>{{ c.get('tl'~n~'_texto','') }}</p>
+          </div>
+        </div>
+        {% endif %}
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+</section>
+{% endif %}
+
+<!-- ── BENEFÍCIOS ──────────────────────────────────────────────────────────── -->
+{% if c.get('oculto_secao_beneficios','0') != '1' %}
+<section id="beneficios">
+  <div class="container">
+    <h2 class="section-title">{{ c.bene_titulo }}</h2>
+    <p class="section-sub">{{ c.bene_subtitulo }}</p>
+    <div class="beneficios-grid">
+      {% for n in range(1, 13) %}
+      {% set titulo = c.get('bene'~n~'_titulo','') %}
+      {% if titulo and c.get('oculto_bene'~n,'0') != '1' %}
+      <div class="bene-card">
+        <div class="bene-icon">{{ c.get('bene'~n~'_icone','⭐') }}</div>
+        <h3>{{ titulo }}</h3>
+        <p>{{ c.get('bene'~n~'_texto','') }}</p>
+      </div>
+      {% endif %}
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endif %}
+
+<!-- ── CTA ────────────────────────────────────────────────────────────────── -->
+{% if c.get('oculto_secao_cta','0') != '1' %}
+<section class="cta-section">
+  <div class="container">
+    <h2 class="section-title">{{ c.cta_titulo }}</h2>
+    <p class="section-sub">{{ c.cta_subtitulo }}</p>
+    <button class="btn-cta-white"
+            onclick="document.getElementById('inscricao').scrollIntoView({behavior:'smooth'})">
+      {{ c.cta_botao }}
+    </button>
+  </div>
+</section>
+{% endif %}
+
+<!-- ── FOOTER ─────────────────────────────────────────────────────────────── -->
+<footer>
+  <strong>{{ c.logo_nome }}</strong>
+  {% if c.footer_texto %}&nbsp;|&nbsp; {{ c.footer_texto }}{% endif %}
+  {% if c.get('oculto_footer_endereco','0') != '1' and c.footer_endereco %}
+    &nbsp;|&nbsp; 📍 {{ c.footer_endereco }}
+  {% endif %}
+  {% if c.get('oculto_footer_telefone','0') != '1' and c.footer_telefone %}
+    &nbsp;|&nbsp; 📞 {{ c.footer_telefone }}
+  {% endif %}
+</footer>
+
+<!-- ── MODAL SUCESSO ──────────────────────────────────────────────────────── -->
+<div class="modal-overlay" id="modalSucesso">
+  <div class="modal-box">
+    <div class="modal-icon">📩</div>
+    <h3>Inscrição realizada!</h3>
+    <p>Enviamos um e-mail de confirmação.<br />
+       <strong>Verifique sua caixa de entrada</strong> (e o spam) e clique no link para ativar.</p>
+    <button class="btn-modal-close" onclick="fecharModal()">Entendido</button>
+  </div>
+</div>
+
+<script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+</html>
