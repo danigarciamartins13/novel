@@ -304,7 +304,7 @@ def send_email(to_addr, subject, html_body):
     msg["To"]      = to_addr
     msg.attach(MIMEText(html_body, "html", "utf-8"))
     ctx = ssl_lib.create_default_context()
-    with smtplib.SMTP_SSL(MAIL_SERVER, MAIL_PORT, context=ctx) as s:
+    with smtplib.SMTP_SSL(MAIL_SERVER, MAIL_PORT, context=ctx, timeout=10) as s:
         s.login(MAIL_USER, MAIL_PASS)
         s.sendmail(MAIL_USER, to_addr, msg.as_string())
 
