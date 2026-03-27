@@ -300,6 +300,7 @@ def inject_globals():
 
 def send_email(to_addr, subject, html_body):
     resend_key = os.getenv("RESEND_API_KEY", "")
+    app.logger.info(f"send_email: RESEND_API_KEY={'SET' if resend_key else 'NAO_SET'}, sender={MAIL_SENDER}")
     if resend_key:
         # Usa API HTTP do Resend (não bloqueada por firewalls de cloud)
         resp = http_requests.post(
