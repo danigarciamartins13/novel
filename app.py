@@ -771,7 +771,9 @@ def admin_personalizar():
 
 # ─── MAIN ─────────────────────────────────────────────────────────────────────
 
+# Inicializa banco e admin ao importar o módulo (gunicorn, Railway, Passenger)
+init_db()
+init_admin()
+
 if __name__ == "__main__":
-    init_db()
-    init_admin()
     app.run(debug=os.getenv("FLASK_DEBUG", "0") == "1")
