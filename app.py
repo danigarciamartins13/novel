@@ -1,7 +1,6 @@
 import os, io, json, sqlite3, uuid, smtplib, ssl as ssl_lib
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
-import requests as http_requests
 from datetime import datetime, timedelta
 from functools import wraps
 from flask import (Flask, request, jsonify, render_template,
@@ -299,40 +298,15 @@ def inject_globals():
 # ─── EMAIL ────────────────────────────────────────────────────────────────────
 
 def send_email(to_addr, subject, html_body):
-    resend_key = os.getenv("RESEND_API_KEY", "")
-    app.logger.info(f"send_email: RESEND_API_KEY={'SET' if resend_key else 'NAO_SET'}, sender={MAIL_SENDER}")
-    if resend_key:
-        # Usa API HTTP do Resend (não bloqueada por firewalls de cloud)
-        resp = http_requests.post(
-            "https://api.resend.com/emails",
-            headers={"Authorization": f"Bearer {resend_key}",
-                     "Content-Type": "application/json"},
-            json={"from": MAIL_SENDER, "to": [to_addr],
-                  "subject": subject, "html": html_body},
-            timeout=15)
-        if not resp.ok:
-            raise Exception(f"Resend API error {resp.status_code}: {resp.text}")
-        return
-
-    # Fallback SMTP
     msg = MIMEMultipart("alternative")
     msg["Subject"] = subject
     msg["From"]    = MAIL_SENDER
     msg["To"]      = to_addr
     msg.attach(MIMEText(html_body, "html", "utf-8"))
-    use_ssl = os.getenv("MAIL_USE_SSL", "False").lower() == "true"
-    use_tls = os.getenv("MAIL_USE_TLS", "True").lower() == "true"
-    if use_ssl:
-        ctx = ssl_lib.create_default_context()
-        with smtplib.SMTP_SSL(MAIL_SERVER, MAIL_PORT, context=ctx, timeout=10) as s:
-            s.login(MAIL_USER, MAIL_PASS)
-            s.sendmail(MAIL_USER, to_addr, msg.as_string())
-    else:
-        with smtplib.SMTP(MAIL_SERVER, MAIL_PORT, timeout=10) as s:
-            if use_tls:
-                s.starttls(context=ssl_lib.create_default_context())
-            s.login(MAIL_USER, MAIL_PASS)
-            s.sendmail(MAIL_USER, to_addr, msg.as_string())
+    ctx = ssl_lib.create_default_context()
+    with smtplib.SMTP_SSL(MAIL_SERVER, MAIL_PORT, context=ctx, timeout=15) as s:
+        s.login(MAIL_USER, MAIL_PASS)
+        s.sendmail(MAIL_USER, to_addr, msg.as_string())
 
 
 def render_template_vars(body: str, lead: dict, extra: dict = None) -> str:

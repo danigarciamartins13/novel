@@ -4,4 +4,3 @@ flask-wtf>=1.2
 python-dotenv>=1.0
 openpyxl>=3.1
 gunicorn>=21.0
-requests>=2.31
