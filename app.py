@@ -415,7 +415,7 @@ def confirmar(token):
         if row["confirmado"]:
             return render_template("confirmar.html", status="ja_confirmado", nome=row["nome"],
                                    numero=row["numero_inscricao"], c=cfg)
-        numero = f"#{random.randint(100000, 999999)}"
+        numero = f"#{random.randint(1000, 9999)}"
         conn.execute("UPDATE inscricoes SET confirmado=1, numero_inscricao=? WHERE token=?",
                      (numero, token))
         conn.commit()
