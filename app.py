@@ -582,7 +582,7 @@ def admin_exportar():
     ws.title = "Leads"
     hdr_fill = PatternFill("solid", fgColor="0D2D6E")
     hdr_font = Font(color="FFFFFF", bold=True)
-    headers = ["ID","Nome","E-mail","Telefone","Confirmado","Cancelado","Cadastro"]
+    headers = ["ID","Nº Inscrição","Nome","E-mail","Telefone","Confirmado","Cancelado","Cadastro"]
     headers += [c["label"] for c in campos]
     for col, h in enumerate(headers, 1):
         cell = ws.cell(row=1, column=col, value=h)
@@ -590,14 +590,15 @@ def admin_exportar():
         cell.alignment = Alignment(horizontal="center")
     for r, row in enumerate(rows, 2):
         extras = json.loads(row["dados_extras"] or "{}") if row["dados_extras"] else {}
-        ws.cell(r,1,row["id"]); ws.cell(r,2,row["nome"]); ws.cell(r,3,row["email"])
-        ws.cell(r,4,row["telefone"])
-        ws.cell(r,5,"Sim" if row["confirmado"] else "Não")
-        ws.cell(r,6,"Sim" if row["cancelado"]  else "Não")
-        ws.cell(r,7,row["criado_em"])
-        for col, c in enumerate(campos, 8):
+        ws.cell(r,1,row["id"]); ws.cell(r,2,row["numero_inscricao"] or "")
+        ws.cell(r,3,row["nome"]); ws.cell(r,4,row["email"])
+        ws.cell(r,5,row["telefone"])
+        ws.cell(r,6,"Sim" if row["confirmado"] else "Não")
+        ws.cell(r,7,"Sim" if row["cancelado"]  else "Não")
+        ws.cell(r,8,row["criado_em"])
+        for col, c in enumerate(campos, 9):
             ws.cell(r, col, extras.get(str(c["id"]),""))
-    for col, w in enumerate([8,30,34,18,12,12,22]+[20]*len(campos), 1):
+    for col, w in enumerate([8,16,30,34,18,12,12,22]+[20]*len(campos), 1):
         ws.column_dimensions[openpyxl.utils.get_column_letter(col)].width = w
     buf = io.BytesIO(); wb.save(buf); buf.seek(0)
     return send_file(buf, as_attachment=True,
